@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/csv"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -27,31 +26,36 @@ func (c *Card) startDate() string {
 }
 
 func main() {
+	// Get
 	url := "https://api.trello.com/1/board/522730ae9504e7ed3d0038e2/cards"
 	key := os.Getenv("TRELLO_API_KEY")
 	token := os.Getenv("TRELLO_API_TOKEN")
 	url = url + "?key=" + key + "&token=" + token
-	fmt.Println("Getting " + url)
-
+	log.Println("Getting: " + url)
 	res, err := http.Get(url)
 
-	if err != nil || res.StatusCode > 300 {
-		log.Fatalf("Status: %d, Error: %v", res.StatusCode, err)
+	// Error handling
+	if err != nil {
+		log.Fatalf("Error: %v", err)
 	}
-	jsonBlob, err := ioutil.ReadAll(res.Body)
+	body, err := ioutil.ReadAll(res.Body)
 	res.Body.Close()
-	if err != nil {
-		log.Fatal(err)
+	if res.StatusCode > 300 {
+		log.Fatalf("Status: %d, Body: %s", res.StatusCode, body)
 	}
-	//fmt.Printf("JSON = %s\n", jsonBlob)
-
-	var cards []Card
-	err = json.Unmarshal(jsonBlob, &cards)
 	if err != nil {
-		fmt.Println("error:", err)
+		log.Fatalf("Error: %v", err)
+	}
+
+	// JSON parsing
+	var cards []Card
+	err = json.Unmarshal(body, &cards)
+	if err != nil {
+		log.Fatalf("Error: %v", err)
 	}
 	//fmt.Printf("%+v", cards)
 
+	// Output
 	writer := csv.NewWriter(os.Stdout)
 
 	//		  fo, err := os.Create("output.csv")
