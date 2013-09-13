@@ -11,9 +11,18 @@ import (
 )
 
 type Card struct {
-	Name string `json:"name"`
-	Due  string `json:"due"`
-	Desc string `json:"desc"`
+	Name      string   `json:"name"`
+	Due       string   `json:"due"`
+	Desc      string   `json:"desc"`
+	IdMembers []string `json:"idMembers"`
+}
+
+func (c *Card) members() string {
+	if len(c.IdMembers) > 0 {
+		return "a member"
+	} else {
+		return "<no member>"
+	}
 }
 
 func (c *Card) Startdate() string {
@@ -25,9 +34,8 @@ func (c *Card) Startdate() string {
 	return ""
 }
 
-func main() {
-	// Get
-	url := "https://api.trello.com/1/board/522730ae9504e7ed3d0038e2/cards"
+func callTrello(call string) []byte {
+	url := "https://api.trello.com/1/" + call + "/cards"
 	key := os.Getenv("TRELLO_API_KEY")
 	token := os.Getenv("TRELLO_API_TOKEN")
 	url = url + "?key=" + key + "&token=" + token
@@ -46,10 +54,15 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error: %v", err)
 	}
+	return body
+}
+
+func main() {
+	body := callTrello("board/522730ae9504e7ed3d0038e2")
 
 	// JSON parsing
 	var cards []Card
-	err = json.Unmarshal(body, &cards)
+	err := json.Unmarshal(body, &cards)
 	if err != nil {
 		log.Fatalf("Error: %v", err)
 	}
@@ -63,7 +76,7 @@ func main() {
 
 	writer.Write([]string{"Arbeitspaket", "Startdatum", "Enddatum", "Kollegen"})
 	for _, card := range cards {
-		writer.Write([]string{card.Name, card.Due, card.Startdate()})
+		writer.Write([]string{card.Name, card.Due, card.Startdate(), card.members()})
 	}
 
 	writer.Flush()
