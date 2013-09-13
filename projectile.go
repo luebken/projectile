@@ -16,7 +16,7 @@ type Card struct {
 	Desc string `json:"desc"`
 }
 
-func (c *Card) startDate() string {
+func (c *Card) Startdate() string {
 	re := regexp.MustCompile("Startdate: \"(.*)\"")
 	matches := re.FindStringSubmatch(c.Desc)
 	if len(matches) > 1 {
@@ -61,9 +61,9 @@ func main() {
 	//		  fo, err := os.Create("output.csv")
 	//		writer := csv.NewWriter(fo)
 
-	writer.Write([]string{"card.Name", "card.Due", "card.Startdate"})
+	writer.Write([]string{"Arbeitspaket", "Startdatum", "Enddatum", "Kollegen"})
 	for _, card := range cards {
-		writer.Write([]string{card.Name, card.Due, card.startDate()})
+		writer.Write([]string{card.Name, card.Due, card.Startdate()})
 	}
 
 	writer.Flush()
