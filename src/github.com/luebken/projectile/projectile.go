@@ -8,20 +8,42 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 )
+
+type Member struct {
+	Name string `json:"fullName"`
+}
 
 type Card struct {
 	Name      string   `json:"name"`
 	Due       string   `json:"due"`
 	Desc      string   `json:"desc"`
 	IdMembers []string `json:"idMembers"`
+	Members   []Member
 }
 
-func (c *Card) members() string {
-	if len(c.IdMembers) > 0 {
-		return "a member"
+func (c *Card) LoadMembers() {
+	c.Members = make([]Member, len(c.IdMembers))
+	for i := 0; i < len(c.IdMembers); i++ {
+		body := callTrello("members/" + c.IdMembers[i])
+		err := json.Unmarshal(body, &c.Members[i])
+		if err != nil {
+			log.Fatalf("Error: %v", err)
+		}
+	}
+}
+
+func (c *Card) MembersAsString() string {
+	c.LoadMembers()
+	if len(c.Members) > 0 {
+		result := ""
+		for _, member := range c.Members {
+			result += member.Name + "; "
+		}
+		return strings.TrimSuffix(result, "; ")
 	} else {
-		return "<no member>"
+		return "<not assigned>"
 	}
 }
 
@@ -35,7 +57,7 @@ func (c *Card) Startdate() string {
 }
 
 func callTrello(call string) []byte {
-	url := "https://api.trello.com/1/" + call + "/cards"
+	url := "https://api.trello.com/1/" + call
 	key := os.Getenv("TRELLO_API_KEY")
 	token := os.Getenv("TRELLO_API_TOKEN")
 	url = url + "?key=" + key + "&token=" + token
@@ -58,7 +80,7 @@ func callTrello(call string) []byte {
 }
 
 func main() {
-	body := callTrello("board/522730ae9504e7ed3d0038e2")
+	body := callTrello("board/522730ae9504e7ed3d0038e2/cards")
 
 	// JSON parsing
 	var cards []Card
@@ -76,7 +98,7 @@ func main() {
 
 	writer.Write([]string{"Arbeitspaket", "Startdatum", "Enddatum", "Kollegen"})
 	for _, card := range cards {
-		writer.Write([]string{card.Name, card.Due, card.Startdate(), card.members()})
+		writer.Write([]string{card.Name, card.Due, card.Startdate(), card.MembersAsString()})
 	}
 
 	writer.Flush()
