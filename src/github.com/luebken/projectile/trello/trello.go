@@ -10,6 +10,11 @@ import (
 	"strings"
 )
 
+type List struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
 type Member struct {
 	Name string `json:"fullName"`
 }
@@ -23,9 +28,11 @@ type Card struct {
 	Name      string   `json:"name"`
 	Due       string   `json:"due"`
 	Desc      string   `json:"desc"`
+	IdList    string   `json:"idList"`
 	IdMembers []string `json:"idMembers"`
 	Labels    []Label  `json:"labels"`
 	Members   []Member
+	List      List
 }
 
 func (c *Card) LoadMembers() {
@@ -36,6 +43,14 @@ func (c *Card) LoadMembers() {
 		if err != nil {
 			log.Fatalf("Error: %v", err)
 		}
+	}
+}
+
+func (c *Card) LoadList() {
+	body := CallTrello("list/" + c.IdList)
+	err := json.Unmarshal(body, &c.List)
+	if err != nil {
+		log.Fatalf("Error: %v", err)
 	}
 }
 
