@@ -48,7 +48,7 @@ func (c *Card) MembersAsString() string {
 }
 
 func (c *Card) Startdate() string {
-	re := regexp.MustCompile("Startdate: \"(.*)\"")
+	re := regexp.MustCompile("Startdate: \"(.*)\"") //TODO only get date
 	matches := re.FindStringSubmatch(c.Desc)
 	if len(matches) > 1 {
 		return matches[1]
@@ -56,6 +56,7 @@ func (c *Card) Startdate() string {
 	return ""
 }
 
+//TODO caching
 func callTrello(call string) []byte {
 	url := "https://api.trello.com/1/" + call
 	key := os.Getenv("TRELLO_API_KEY")
