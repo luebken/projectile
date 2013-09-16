@@ -27,9 +27,9 @@ func main() {
 	//		  fo, err := os.Create("output.csv")
 	//		writer := csv.NewWriter(fo)
 
-	writer.Write([]string{"Arbeitspaket", "Startdatum", "Enddatum", "Kollegen"})
+	writer.Write([]string{"Arbeitsbereich", "Arbeitspaket", "Startdatum", "Enddatum", "Kollegen"})
 	for _, card := range cards {
-		writer.Write([]string{card.Name, card.Due, card.Startdate(), card.MembersAsString()})
+		writer.Write([]string{card.LabelsAsString(), card.Name, card.Due, card.Startdate(), card.MembersAsString()})
 	}
 
 	writer.Flush()

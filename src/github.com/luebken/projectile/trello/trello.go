@@ -14,11 +14,17 @@ type Member struct {
 	Name string `json:"fullName"`
 }
 
+type Label struct {
+	Color string `json:"color"`
+	Name  string `json:"name"`
+}
+
 type Card struct {
 	Name      string   `json:"name"`
 	Due       string   `json:"due"`
 	Desc      string   `json:"desc"`
 	IdMembers []string `json:"idMembers"`
+	Labels    []Label  `json:"labels"`
 	Members   []Member
 }
 
@@ -31,6 +37,14 @@ func (c *Card) LoadMembers() {
 			log.Fatalf("Error: %v", err)
 		}
 	}
+}
+
+func (c *Card) LabelsAsString() string {
+	result := ""
+	for _, label := range c.Labels {
+		result += label.Name + "; "
+	}
+	return strings.TrimSuffix(result, "; ")
 }
 
 func (c *Card) MembersAsString() string {
