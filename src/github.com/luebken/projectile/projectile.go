@@ -8,6 +8,7 @@ import (
 	"os"
 )
 
+//TODO trello board as commandline parameter
 func main() {
 
 	body := trello.CallTrello("board/522730ae9504e7ed3d0038e2/cards")
