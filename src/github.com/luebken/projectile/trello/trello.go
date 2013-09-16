@@ -55,8 +55,14 @@ func (c *Card) Startdate() string {
 	return ""
 }
 
-//TODO caching
+var callCache = make(map[string][]byte)
+
 func CallTrello(call string) []byte {
+	result, cacheHit := callCache[call]
+	if cacheHit {
+		log.Println("Cache hit for " + call)
+		return result
+	}
 	url := "https://api.trello.com/1/" + call
 	key := os.Getenv("TRELLO_API_KEY")
 	token := os.Getenv("TRELLO_API_TOKEN")
@@ -76,5 +82,6 @@ func CallTrello(call string) []byte {
 	if err != nil {
 		log.Fatalf("Error: %v", err)
 	}
+	callCache[call] = body
 	return body
 }
